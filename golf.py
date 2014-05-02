@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import os, sys
 import pygame
 import math
@@ -12,3 +13,8 @@ class GameSpace:
 
 if __name__ == "__main__":
     GameSpace()
+=======
+import pygame 
+import math
+import pygame.color import THECOLORS
+>>>>>>> 7241987d0c8f227038884855d182003e11e6f0b1
