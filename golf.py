@@ -23,8 +23,6 @@ class GameSpace:
 		while 1:
 			#get the mouse x and y position on the screen
 			self.mx, self.my = pygame.mouse.get_pos()
-	
-			self.clock.tick(60)
 			
 			#user inputs
       			for event in pygame.event.get():
@@ -37,13 +35,17 @@ class GameSpace:
 					self.ball.tohit = True
 				elif event.type == MOUSEBUTTONUP and event.button == 1:
 					self.ball.tohit = False
+
+			
+			self.ball.tick()			
+			self.clock.tick(60)
 			
 			self.screen.fill(self.color)
 			self.screen.blit(self.ball.image, self.ball.rect)
 
 			pygame.draw.circle(self.screen, (0,0,0), (300, 300), 8)
 			if self.ball.tohit == True:
-				pygame.draw.line(self.screen, (0,0,0),(self.mx, self.my), (self.ball.rect.centerx, self.ball.rect.centery))
+				pygame.draw.line(self.screen, (0,0,0),(self.ball.powerx, self.ball.powery), (self.ball.rect.centerx, self.ball.rect.centery))
 
 
 			pygame.display.flip()

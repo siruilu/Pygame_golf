@@ -23,9 +23,6 @@ class GameSpace:
 		while 1:
 			#get the mouse x and y position on the screen
 			self.mx, self.my = pygame.mouse.get_pos()
-	
-			self.clock.tick(60)
-			self.ball.tick()
 			
 			#user inputs
       			for event in pygame.event.get():
@@ -38,6 +35,10 @@ class GameSpace:
 					self.ball.tohit = True
 				elif event.type == MOUSEBUTTONUP and event.button == 1:
 					self.ball.tohit = False
+
+			
+			self.ball.tick()			
+			self.clock.tick(60)
 			
 			self.screen.fill(self.color)
 			self.screen.blit(self.ball.image, self.ball.rect)
