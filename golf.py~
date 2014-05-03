@@ -45,7 +45,7 @@ class GameSpace:
 
 			pygame.draw.circle(self.screen, (0,0,0), (300, 300), 8)
 			if self.ball.tohit == True:
-				pygame.draw.line(self.screen, (0,0,0),(self.mx, self.my), (self.ball.rect.centerx, self.ball.rect.centery))
+				pygame.draw.line(self.screen, (0,0,0),(self.ball.linex, self.ball.liney), (self.ball.rect.centerx, self.ball.rect.centery))
 
 
 			pygame.display.flip()

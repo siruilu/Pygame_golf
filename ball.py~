@@ -24,17 +24,13 @@ class Ball(pygame.sprite.Sprite):
 	
 			#if distance is more than maximum power
 			if self.distance > 100:
-				#calculate angle
+				#calculate angle and where line should be
       				self.angle = math.atan2(self.dy, self.dx)
+				
+				self.linex = self.rect.centerx + 100*math.cos(self.angle)
+				self.liney = self.rect.centery + 100*math.sin(self.angle)
 
-				if self.angle < 0:				
-					self.powery = 100*math.cos(self.angle)
-					self.powerx = -100*math.sin(self.angle)
-				else:
-					self.powery = 100*math.cos(self.angle)
-					self.powerx = 100*math.sin(self.angle)
-			
 			#otherwise just use mouse coordinates
 			else:
-				self.powerx = self.gs.mx
-				self.powery = self.gs.my
+				self.linex = self.gs.mx
+				self.liney = self.gs.my
