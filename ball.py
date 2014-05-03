@@ -1,7 +1,7 @@
 import os, sys
 import pygame
 import math
-from pygame import locals
+from pygame.locals import *
 
 class Ball(pygame.sprite.Sprite):
 	def __init__(self,gs=None,x=100,y=100):
@@ -12,4 +12,8 @@ class Ball(pygame.sprite.Sprite):
 
 		self.rect = self.image.get_rect(center = (x,y))
 
-		self.orig_image = self.image
+		#flag to see whether player is putting
+		self.tohit = False
+
+
+			
