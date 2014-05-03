@@ -4,7 +4,7 @@ import math
 from pygame import locals
 
 class Ball(pygame.sprite.Sprite):
-	def __init__(self,gs=None,x=100,y=100):
+	def __init__(self,gs=None,x,y):
 		pygame.sprite.Sprite.__init__(self)
 		
 		self.gs = gs

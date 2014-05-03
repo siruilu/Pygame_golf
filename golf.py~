@@ -23,7 +23,7 @@ class GameSpace:
 			self.screen.fill(self.color)
 			self.screen.blit(self.ball.image, self.ball.rect)
 
-			pygame.draw.circle(self.screen, (0,0,0), (300, 300), 8)
+			pygame.draw.circle(self.screen, (0,0,0), (300, 300), 15)
 
 			pygame.display.flip()
 
