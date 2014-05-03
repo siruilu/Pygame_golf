@@ -16,6 +16,10 @@ class GameSpace:
 
    		self.size = self.width, self.height = 640, 480
 		self.color = 0, 255, 0
+
+		#position of hole
+		self.holex = 400
+		self.holey = 300
 		
 		
     		self.screen = pygame.display.set_mode(self.size)
@@ -48,7 +52,9 @@ class GameSpace:
 			self.screen.fill(self.color)
 			self.screen.blit(self.ball.image, self.ball.rect)
 
-			pygame.draw.circle(self.screen, (0,0,0), (300, 300), 8)
+			#draw hole
+			pygame.draw.circle(self.screen, (0,0,0), (self.holex, self.holey), 8)
+			#draw line for putting
 			if self.ball.tohit == True:
 				pygame.draw.line(self.screen, (0,0,0),(self.ball.linex, self.ball.liney), (self.ball.rect.centerx, self.ball.rect.centery))
 

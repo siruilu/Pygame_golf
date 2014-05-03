@@ -45,21 +45,36 @@ class Ball(pygame.sprite.Sprite):
 
 		#if not preparing to hit, move ball
 		else:
+			self.detect_collision()
 			newpos = self.rect.move((self.vx, self.vy))
       			self.rect = newpos
 			self.vx *= .9
-			self.vy *= .9
+			self.vy *= .9		
 
-			if self.vx < 0.1 and self.vx > -0.1 and self.by > -0.1 and self.vy < 0.1:
+			if self.vx < 0.1 and self.vx > -0.1 and self.vy > -0.1 and self.vy < 0.1:
 				self.vx = 0
 				self.vy = 0
 				self.moving = False
 
 
+	#adjust velocity if ball interacts with some environment object 
+	def detect_collision(self):
+		#if ball hits the edge of screen
+		if self.rect.centerx + self.vx > 640 or self.rect.centerx + self.vx < 0:
+			self.vx*=-1
+		if self.rect.centery + self.vy > 480 or self.rect.centery + self.vy < 0:
+			self.vy*=-1
 
+		#check if ball is in hole
+		if self.rect.collidepoint(self.gs.holex, self.gs.holey):
+			self.vy = 0
+			self.vx = 0
+
+	#hit ball
 	def putt(self):
 		self.moving = True
-		self.vx = -self.powerx/10
-		self.vy = -self.powery/10
+		#initiate movement
+		self.vx = -self.powerx/1.5
+		self.vy = -self.powery/1.5
 		
 		
