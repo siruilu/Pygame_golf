@@ -11,9 +11,13 @@ class Ball(pygame.sprite.Sprite):
 		self.image = pygame.image.load("/afs/nd.edu/user2/dhaberme/Public/golfball.png")
 
 		self.rect = self.image.get_rect(center = (x,y))
+		self.vx = 0     #velocity
+		self.vy = 0
+		
 
 		#flag to see whether player is putting
 		self.tohit = False
+		self.moving = False
 
 	def tick(self):
 		if self.tohit == True:
@@ -27,10 +31,35 @@ class Ball(pygame.sprite.Sprite):
 				#calculate angle and where line should be
       				self.angle = math.atan2(self.dy, self.dx)
 				
-				self.linex = self.rect.centerx + 100*math.cos(self.angle)
-				self.liney = self.rect.centery + 100*math.sin(self.angle)
+				self.powerx = 100*math.cos(self.angle)
+				self.powery = 100*math.sin(self.angle)
+				self.linex = self.rect.centerx + self.powerx
+				self.liney = self.rect.centery + self.powery
 
 			#otherwise just use mouse coordinates
 			else:
 				self.linex = self.gs.mx
 				self.liney = self.gs.my
+				self.powerx = self.linex - self.rect.centerx
+				self.powery = self.liney - self.rect.centery
+
+		#if not preparing to hit, move ball
+		else:
+			newpos = self.rect.move((self.vx, self.vy))
+      			self.rect = newpos
+			self.vx *= .9
+			self.vy *= .9
+
+			if self.vx < 0.1 and self.vx > -0.1 and self.by > -0.1 and self.vy < 0.1:
+				self.vx = 0
+				self.vy = 0
+				self.moving = False
+
+
+
+	def putt(self):
+		self.moving = True
+		self.vx = -self.powerx/10
+		self.vy = -self.powery/10
+		
+		

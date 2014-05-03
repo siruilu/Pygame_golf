@@ -32,9 +32,14 @@ class GameSpace:
       			    		pygame.quit()
 				#putt
 				elif event.type == MOUSEBUTTONDOWN and event.button == 1:
-					self.ball.tohit = True
+					#only start putting process if ball is not moving
+					if self.ball.moving == False:
+						self.ball.tohit = True
 				elif event.type == MOUSEBUTTONUP and event.button == 1:
-					self.ball.tohit = False
+					#only hit if line is drawn
+					if self.ball.moving == False and self.tohit == True:					
+						self.ball.tohit = False
+						self.ball.putt()
 
 			
 			self.ball.tick()			
