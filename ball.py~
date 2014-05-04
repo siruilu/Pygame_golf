@@ -9,7 +9,6 @@ class Ball(pygame.sprite.Sprite):
 		
 		self.gs = gs
 		self.image = pygame.image.load("/afs/nd.edu/user2/dhaberme/Public/golfball.png")
-
 		self.rect = self.image.get_rect(center = (x,y))
 		self.vx = 0     #velocity
 		self.vy = 0
@@ -18,6 +17,7 @@ class Ball(pygame.sprite.Sprite):
 		#flag to see whether player is putting
 		self.tohit = False
 		self.moving = False
+		self.inHole = False
 
 	def tick(self):
 		if self.tohit == True:
@@ -44,17 +44,21 @@ class Ball(pygame.sprite.Sprite):
 				self.powery = self.liney - self.rect.centery
 
 		#if not preparing to hit, move ball
-		else:
+		else if self.moving == True:
 			self.detect_collision()
 			newpos = self.rect.move((self.vx, self.vy))
       			self.rect = newpos
-			self.vx *= .9
-			self.vy *= .9		
+			self.vx *= .96
+			self.vy *= .96		
 
 			if self.vx < 0.1 and self.vx > -0.1 and self.vy > -0.1 and self.vy < 0.1:
 				self.vx = 0
 				self.vy = 0
 				self.moving = False
+
+		#if ball is in hole
+		else if self.inHole == True:
+			self.rect.center = (self.gs.holex, self.gs.holey)
 
 
 	#adjust velocity if ball interacts with some environment object 
@@ -69,12 +73,13 @@ class Ball(pygame.sprite.Sprite):
 		if self.rect.collidepoint(self.gs.holex, self.gs.holey):
 			self.vy = 0
 			self.vx = 0
+			self.inHole = True
 
 	#hit ball
 	def putt(self):
 		self.moving = True
 		#initiate movement
-		self.vx = -self.powerx/1.5
-		self.vy = -self.powery/1.5
+		self.vx = -self.powerx/5
+		self.vy = -self.powery/5
 		
 		
