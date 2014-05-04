@@ -21,18 +21,23 @@ class GameSpace:
 		#position of hole
 		self.holex = 400
 		self.holey = 300
+
+		#whose turn it is
+		self.turn = 1
 		
 		
     		self.screen = pygame.display.set_mode(self.size)
 
+		#make image backgrounds transparent
 		self.ball1.image.convert_alpha()
 		self.ball1.image.set_colorkey(THECOLORS['white'])
-
+		self.ball2.image.convert_alpha()
+		self.ball2.image.set_colorkey(THECOLORS['white'])
 
 		while 1:
 			#get the mouse x and y position on the screen
 			self.mx, self.my = pygame.mouse.get_pos()
-			
+
 			#user inputs
       			for event in pygame.event.get():
       				if event.type == QUIT:
@@ -41,28 +46,53 @@ class GameSpace:
       			    		pygame.quit()
 				#putt
 				elif event.type == MOUSEBUTTONDOWN and event.button == 1:
-					#only start putting process if ball is not moving
-					if self.ball1.moving == False and self.ball1.inHole == False:
-						self.ball1.tohit = True
+				
+					if self.turn == 1:					
+						#only start putting process if ball is not moving
+						if self.ball2.moving == False and self.ball1.inHole == False:
+							self.ball1.tohit = True
+					elif self.turn == 2:
+						if self.ball1.moving == False and self.ball2.inHole == False:
+							self.ball2.tohit = True
 				elif event.type == MOUSEBUTTONUP and event.button == 1:
-					#only hit if line is drawn
-					if self.ball1.moving == False and self.ball1.tohit == True and self.ball1.inHole == False:					
-						self.ball1.tohit = False
-						self.ball1.putt()
+					if self.turn == 1:
+						#only hit if line is drawn
+						if self.ball2.moving == False and self.ball1.tohit == True and self.ball1.inHole == False:					
+							self.ball1.tohit = False
+							self.ball1.putt()
+							#switch turn to next player if not done
+							if self.ball2.inHole == False:
+								self.turn = 2
+							
+					elif self.turn == 2: 					
+						if self.ball1.moving == False and self.ball2.tohit == True and self.ball2.inHole == False:					
+							self.ball2.tohit = False
+							self.ball2.putt()
+							if self.ball1.inHole == False:
+								self.turn = 1
 
 			
-			self.ball1.tick()			
+			self.ball1.tick()
+			self.ball2.tick()			
 			self.clock.tick(60)
 			
 			self.screen.fill(self.color)
-			#draw hole and ball
+			#draw hole and balls
 			pygame.draw.circle(self.screen, (0,0,0), (self.holex, self.holey), 8)
 			self.screen.blit(self.ball1.image, self.ball1.rect)
+			self.screen.blit(self.ball2.image, self.ball2.rect)
 
 			#draw line for putting
 			if self.ball1.tohit == True:
 				pygame.draw.line(self.screen, (0,0,0),(self.ball1.linex, self.ball1.liney), (self.ball1.rect.centerx, self.ball1.rect.centery))
+		
+			if self.ball2.tohit == True:
+				pygame.draw.line(self.screen, (0,0,0),(self.ball2.linex, self.ball2.liney), (self.ball2.rect.centerx, self.ball2.rect.centery))
 
+			#display turn
+     			self.turn_label = self.myfont.render("Player " + str(self.turn) + "'s Turn", 1, (186,146,0))
+      			self.screen.blit(self.turn_label, (450, 0) )
+			
 
 			pygame.display.flip()
 

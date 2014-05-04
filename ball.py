@@ -56,6 +56,7 @@ class Ball(pygame.sprite.Sprite):
 				self.vy = 0
 				self.moving = False
 
+
 		#if ball is in hole
 		elif self.inHole == True:
 			self.rect.center = (self.gs.holex, self.gs.holey)

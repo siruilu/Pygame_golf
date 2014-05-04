@@ -44,7 +44,7 @@ class Ball(pygame.sprite.Sprite):
 				self.powery = self.liney - self.rect.centery
 
 		#if not preparing to hit, move ball
-		else if self.moving == True:
+		elif self.moving == True:
 			self.detect_collision()
 			newpos = self.rect.move((self.vx, self.vy))
       			self.rect = newpos
@@ -55,9 +55,14 @@ class Ball(pygame.sprite.Sprite):
 				self.vx = 0
 				self.vy = 0
 				self.moving = False
+				#switch turn to next player if not done
+				if self.gs.turn == 1 and self.gs.ball2.inHole == False:
+					self.gs.turn = 2
+				if self.gs.turn == 2 and self.gs.ball1.inHole == False:
+					self.gs.turn = 1
 
 		#if ball is in hole
-		else if self.inHole == True:
+		elif self.inHole == True:
 			self.rect.center = (self.gs.holex, self.gs.holey)
 
 
