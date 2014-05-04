@@ -1,12 +1,20 @@
+#!/usr/bin/python
+
 import os, sys
 import pygame
 import math
 from pygame.locals import *
 from pygame.color import THECOLORS
+from twisted.internet.protocol import ClientFactory, Protocol
+from twisted.internet import reactor
 import ball
 
 class GameSpace:
+	def __init__(self, num):
+		self.player = num
+
 	def main(self):
+		print self.player
 		self.ball1 = ball.Ball(self)
 		self.ball2 = ball.Ball(self)
 
@@ -94,15 +102,24 @@ class GameSpace:
 			self.strokes1 = self.myfont.render("Player 1 Strokes: " + str(self.ball1.strokes), 1, THECOLORS['blue'])
 			self.strokes2 = self.myfont.render("Player 2 Strokes: " + str(self.ball2.strokes), 1, THECOLORS['red'])
       			self.screen.blit(self.turn_label, (495, 0) )
-			self.screen.blit(self.strokes1, (460, 15) )
-			self.screen.blit(self.strokes2, (460, 30) )
+			self.screen.blit(self.strokes1, (457, 15) )
+			self.screen.blit(self.strokes2, (457, 30) )
 			
 
 			pygame.display.flip()
 
 
 if __name__ == "__main__":
-    gs = GameSpace()
-    gs.main()
+	
+	if len(sys.argv) != 2:
+		print 'Incorrect number of arguments'
+		print 'usage: python2.6 golf.py <player number (1 or 2)>'
+		sys.exit(2)
+	elif int(sys.argv[1]) != 1 and int(sys.argv[1]) != 2:
+		print 'Player number must be 1 or 2'
+		sys.exit(2)
+	else:		
+		gs = GameSpace(int(sys.argv[1]))
+	    	gs.main()
 
 

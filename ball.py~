@@ -83,6 +83,6 @@ class Ball(pygame.sprite.Sprite):
 		#initiate movement
 		self.vx = -self.powerx/5
 		self.vy = -self.powery/5
-		self.strokes++
+		self.strokes+=1
 		
 		
