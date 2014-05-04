@@ -9,6 +9,7 @@ from twisted.internet.protocol import ClientFactory, Protocol
 from twisted.internet import reactor
 import ball
 
+
 class GameSpace:
 	def __init__(self, num):
 		self.player = num
@@ -41,6 +42,7 @@ class GameSpace:
 		self.ball1.image.set_colorkey(THECOLORS['white'])
 		self.ball2.image.convert_alpha()
 		self.ball2.image.set_colorkey(THECOLORS['white'])
+
 
 		while 1:
 			#get the mouse x and y position on the screen
@@ -109,6 +111,26 @@ class GameSpace:
 			pygame.display.flip()
 
 
+#networking classes
+class Connection(Protocol):
+	def dataReceived(self, data):
+       		if data == 'connected':
+			gs = GameSpace(int(sys.argv[1]))
+			gs.main()
+		
+  	def connectionMade(self):
+		print 'Cool'
+		#store in global variable to communicate in Gamespace class
+  		connection = self
+    		self.transport.write('connected')
+
+		
+class ConnectionFactory(ClientFactory):
+ 	def buildProtocol(self, addr):
+	  	return Connection()
+
+
+
 if __name__ == "__main__":
 	
 	if len(sys.argv) != 2:
@@ -118,8 +140,13 @@ if __name__ == "__main__":
 	elif int(sys.argv[1]) != 1 and int(sys.argv[1]) != 2:
 		print 'Player number must be 1 or 2'
 		sys.exit(2)
-	else:		
-		gs = GameSpace(int(sys.argv[1]))
-	    	gs.main()
+	else:	
+		if int(sys.argv[1]) == 1:
+			reactor.listenTCP(40034, ConnectionFactory())
+			reactor.run()
+		elif int(sys.argv[1]) == 2:
+			reactor.connectTCP("student03.cse.nd.edu", 40034, ConnectionFactory())
+			reactor.run() 	
+		
 
 
