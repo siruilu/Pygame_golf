@@ -89,9 +89,13 @@ class GameSpace:
 			if self.ball2.tohit == True:
 				pygame.draw.line(self.screen, (0,0,0),(self.ball2.linex, self.ball2.liney), (self.ball2.rect.centerx, self.ball2.rect.centery))
 
-			#display turn
-     			self.turn_label = self.myfont.render("Player " + str(self.turn) + "'s Turn", 1, (186,146,0))
-      			self.screen.blit(self.turn_label, (450, 0) )
+			#display turn and strokes
+     			self.turn_label = self.myfont.render("Player " + str(self.turn) + "'s Turn", 1, THECOLORS['black'])
+			self.strokes1 = self.myfont.render("Player 1 Strokes: " + str(self.ball1.strokes), 1, THECOLORS['blue'])
+			self.strokes2 = self.myfont.render("Player 2 Strokes: " + str(self.ball2.strokes), 1, THECOLORS['red'])
+      			self.screen.blit(self.turn_label, (495, 0) )
+			self.screen.blit(self.strokes1, (460, 15) )
+			self.screen.blit(self.strokes2, (460, 30) )
 			
 
 			pygame.display.flip()

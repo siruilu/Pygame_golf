@@ -12,9 +12,10 @@ class Ball(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect(center = (x,y))
 		self.vx = 0     #velocity
 		self.vy = 0
+		self.strokes = 0
 		
 
-		#flag to see whether player is putting
+		#flags to indicate state of ball
 		self.tohit = False
 		self.moving = False
 		self.inHole = False
@@ -82,5 +83,6 @@ class Ball(pygame.sprite.Sprite):
 		#initiate movement
 		self.vx = -self.powerx/5
 		self.vy = -self.powery/5
+		self.strokes+=1
 		
 		
