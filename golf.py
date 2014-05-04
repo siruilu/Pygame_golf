@@ -11,8 +11,11 @@ import ball
 
 
 class GameSpace:
-	def __init__(self, num):
+	#initiate player with number
+	def __init__(self, num, connection):
 		self.player = num
+		self.connection = connection
+
 
 	def main(self):
 
@@ -45,6 +48,13 @@ class GameSpace:
 
 
 		while 1:
+			#send data over connection
+			if self.player == 1:
+				self.connection.transport.write(str(self.ball1.rect.centerx) + "," + str(self.ball1.rect.centery))
+			if self.player == 2:
+				self.connection.transport.write(str(self.ball2.rect.centerx) + "," + str(self.ball2.rect.centery))
+
+
 			#get the mouse x and y position on the screen
 			self.mx, self.my = pygame.mouse.get_pos()
 
@@ -56,16 +66,16 @@ class GameSpace:
       			    		pygame.quit()
 				#putt
 				elif event.type == MOUSEBUTTONDOWN and event.button == 1:
-				
-					if self.turn == 1:					
+					#determine if it is your turn
+					if self.turn == 1 and self.player == 1:					
 						#only start putting process if ball is not moving
 						if self.ball2.moving == False and self.ball1.inHole == False:
 							self.ball1.tohit = True
-					elif self.turn == 2:
+					elif self.turn == 2 and self.player == 2:
 						if self.ball1.moving == False and self.ball2.inHole == False:
 							self.ball2.tohit = True
 				elif event.type == MOUSEBUTTONUP and event.button == 1:
-					if self.turn == 1:
+					if self.turn == 1 and self.player == 1:
 						#only hit if line is drawn
 						if self.ball2.moving == False and self.ball1.tohit == True and self.ball1.inHole == False:					
 							self.ball1.tohit = False
@@ -74,14 +84,14 @@ class GameSpace:
 							if self.ball2.inHole == False:
 								self.turn = 2
 							
-					elif self.turn == 2: 					
+					elif self.turn == 2 and self.player == 2: 					
 						if self.ball1.moving == False and self.ball2.tohit == True and self.ball2.inHole == False:					
 							self.ball2.tohit = False
 							self.ball2.putt()
 							if self.ball1.inHole == False:
 								self.turn = 1
 
-			
+			#update all objects
 			self.ball1.tick()
 			self.ball2.tick()			
 			self.clock.tick(60)
@@ -114,15 +124,23 @@ class GameSpace:
 #networking classes
 class Connection(Protocol):
 	def dataReceived(self, data):
-       		if data == 'connected':
-			gs = GameSpace(int(sys.argv[1]))
-			gs.main()
+		print 'Receive'
+		#data contains positions
+
+		#parse data
+		data.partition(',')
+			
+		#change other player's ball position
+		if int(sys.argv[1]) == 1:							
+			gs.ball2.rect.center = (data[0], data[2])				
+		if int(sys.argv[1]) == 2:							
+			gs.ball1.rect.center = (data[0], data[2])	
+			
 		
   	def connectionMade(self):
-		print 'Cool'
-		#store in global variable to communicate in Gamespace class
-  		connection = self
-    		self.transport.write('connected')
+		print 'Connected to other player'
+		gs = GameSpace(int(sys.argv[1]), self)   #initate game and pass self
+		gs.main()
 
 		
 class ConnectionFactory(ClientFactory):
@@ -141,12 +159,15 @@ if __name__ == "__main__":
 		print 'Player number must be 1 or 2'
 		sys.exit(2)
 	else:	
+		#if argument correct, run program
 		if int(sys.argv[1]) == 1:
 			reactor.listenTCP(40034, ConnectionFactory())
 			reactor.run()
 		elif int(sys.argv[1]) == 2:
 			reactor.connectTCP("student03.cse.nd.edu", 40034, ConnectionFactory())
 			reactor.run() 	
+	
+
 		
 
 
