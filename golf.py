@@ -7,18 +7,15 @@ from pygame.locals import *
 from pygame.color import THECOLORS
 from twisted.internet.protocol import ClientFactory, Protocol
 from twisted.internet import reactor
-import ball
+import ball, course
 
 
 class GameSpace:
-	#initiate player with number
+	#initiate player with number and variables
 	def __init__(self, num, connection):
 		self.player = num
 		self.connection = connection
-
-		self.ball1 = ball.Ball(self)
-		self.ball2 = ball.Ball(self)
-
+		
 		pygame.font.init()
 		self.clock = pygame.time.Clock()
 		
@@ -27,12 +24,14 @@ class GameSpace:
    		self.size = self.width, self.height = 640, 480
 		self.color = 0, 255, 0
 
-		#position of hole
-		self.holex = 400
-		self.holey = 300
-
 		#whose turn it is
 		self.turn = 1
+
+		#hole number
+		self.hole_num = 8
+
+		#initiate first hole
+		self.next_hole()
 
 		#temporary variables for receiving data over connection		
 		self.xpos = 100
@@ -41,16 +40,23 @@ class GameSpace:
 		self.tohit = False
 		self.moving = False
 		self.inhole = False
+
+		self.player1score = 0  #Will be used to keep track of player totals across courses
+		self.player2score = 0
 		
     		self.screen = pygame.display.set_mode(self.size)
 
-		#make image backgrounds transparent
-		self.ball1.image.convert_alpha()
-		self.ball1.image.set_colorkey(THECOLORS['white'])
-		self.ball2.image.convert_alpha()
-		self.ball2.image.set_colorkey(THECOLORS['white'])
+	#on to next hole
+	def next_hole(self):
+		self.course = course.Course(self, str(self.hole_num))
+		self.ball1 = ball.Ball(self, self.course.ball_location[0], self.course.ball_location[1])
+		self.ball2 = ball.Ball(self, self.course.ball_location[0], self.course.ball_location[1])
 
-		print "GameSpace created"	
+		#Gives each player their own color ball
+		self.ball1.image = pygame.image.load("/afs/nd.edu/user2/dhaberme/Public/red_golfball.fw.png")
+		self.ball2.image = pygame.image.load("/afs/nd.edu/user2/dhaberme/Public/blue_golfball.fw.png")
+
+		self.turn = 1
 
 
 	#receive data sent from other player
@@ -79,7 +85,8 @@ class GameSpace:
 	#main loop
 	def main(self):
 		
-		if True:
+		#if both balls are not in hole, continue gameplay
+		if self.ball1.inHole == False or self.ball2.inHole == False:
 			#send data over connection
 			if self.player == 1:
 				self.connection.transport.write(str(self.ball1.rect.centerx) + "," + str(self.ball1.rect.centery) + "," + str(self.ball1.strokes) + "," + str(self.ball1.tohit) + "," + str(self.ball1.moving) + "," + str(self.ball1.inHole) )
@@ -157,17 +164,21 @@ class GameSpace:
 			self.clock.tick(60)
 			
 			self.screen.fill(self.color)
+			
 			#draw hole and balls
-			pygame.draw.circle(self.screen, (0,0,0), (self.holex, self.holey), 8)
-			self.screen.blit(self.ball1.image, self.ball1.rect)
-			self.screen.blit(self.ball2.image, self.ball2.rect)
+			self.course.tick()
+			self.screen.blit(self.course.image, self.course.rect)
+			self.screen.blit(self.ball1.image, self.ball2.rect)
+			self.screen.blit(self.ball2.image, self.ball1.rect)
+
 
 			#draw line for putting
-			if self.ball1.tohit == True:
+			if self.ball1.tohit == True and self.player == 1:
 				pygame.draw.line(self.screen, (0,0,0),(self.ball1.linex, self.ball1.liney), (self.ball1.rect.centerx, self.ball1.rect.centery))
 		
-			if self.ball2.tohit == True:
+			if self.ball2.tohit == True and self.player == 2:
 				pygame.draw.line(self.screen, (0,0,0),(self.ball2.linex, self.ball2.liney), (self.ball2.rect.centerx, self.ball2.rect.centery))
+
 
 			#display turn and strokes
      			self.turn_label = self.myfont.render("Player " + str(self.turn) + "'s Turn", 1, THECOLORS['black'])
@@ -179,6 +190,32 @@ class GameSpace:
 			
 
 			pygame.display.flip()
+
+		#if both players are done with hole and not to end of course yet
+		elif self.hole_num < 9:
+			self.player1score = self.player1score + (int(self.ball1.strokes) - int(self.course.par) + 1)
+			self.player2score = self.player2score + (int(self.ball2.strokes) - int(self.course.par) + 1)
+			self.hole_num += 1
+			self.next_hole()
+
+		#this means done with course
+		else:
+			self.player1score = self.player1score + (int(self.ball1.strokes) - int(self.course.par) + 1)
+			self.player2score = self.player2score + (int(self.ball2.strokes) - int(self.course.par) + 1)
+
+			if self.player1score > self.player2score:
+				self.end_label = self.myfont.render("Player 1 Wins!!", 1, THECOLORS['black'])
+			elif self.player2score > self.player1score:
+				self.end_label = self.myfont.render("Player 2 Wins!!", 1, THECOLORS['black'])
+			else:
+				self.end_label = self.myfont.render("It is a tie!", 1, THECOLORS['black'])
+
+			self.end1 = self.myfont.render("Player 1 Final Strokes: " + str(self.player1score), 1, THECOLORS['blue'])
+			self.end2 = self.myfont.render("Player 2 Final Strokes: " + str(self.player2score), 1, THECOLORS['red'])
+	      		self.screen.blit(self.end_label, (320, 215) )
+			self.screen.blit(self.end1, (320, 230) )
+			self.screen.blit(self.end2, (320, 245) )
+			
 
 
 

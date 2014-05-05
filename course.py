@@ -1,0 +1,67 @@
+import os, sys
+import pygame
+import math
+from pygame.locals import *
+from pygame.color import THECOLORS
+import ball
+
+#wall class allows us to use sprite list collision detection
+class Wall(pygame.sprite.Sprite):
+	def __init__(self, x,y,w,l):
+		pygame.sprite.Sprite.__init__(self)
+		self.rect = Rect(x,y,w,l)
+
+class Course(pygame.sprite.Sprite):
+	def __init__(self, gs=None, filename="1"):
+		self.gs = gs
+		self.bounds = []
+		self.hole_location = ()
+		self.sand = []
+		self.par = 0
+		self.filename = '/afs/nd.edu/user2/dhaberme/Public/course' + filename + '.py'
+		self.image = pygame.image.load("/afs/nd.edu/user2/dhaberme/Public/golf_hole.png")
+		self.f = file(self.filename, 'r')
+		self.horizrectlist = []
+		self.vertrectlist = []
+		self.vertwalls = pygame.sprite.Group()
+		self.horizwalls = pygame.sprite.Group()
+
+		#these walls are constant through all courses. that's why they're hard coded
+		self.vertwalls.add(Wall(0,0,10,480))
+		self.horizwalls.add(Wall(0,0,640,10))
+		self.horizwalls.add(Wall(0,470,640,100))
+		self.vertwalls.add(Wall(630,0,10,480))
+		count = 0
+		while True:
+			self.line = self.f.readline()
+			count += 1
+			if len(self.line) == 0:
+				break
+			if count == 1:
+				self.sand = eval(self.line)
+			if count == 2:   #loads points to draw boundaries
+				self.bounds = eval(self.line)
+			if count == 3:  #loads hole location
+				self.hole_location = eval(self.line)
+			if count == 4:   #loads initial ball location
+				self.ball_location = eval(self.line)
+			if count == 5:    #this is for if we decide to do a par for courses
+				self.par = self.line
+			if count == 6:   #this loads rect values for all horizontal walls
+				self.horizrectlist = eval(self.line)
+				self.horizrectlist = zip(*[iter(self.horizrectlist)]*4)
+			if count == 7:   #this loads rect values for all vert walls
+				self.vertrectlist = eval(self.line)
+				self.vertrectlist = zip(*[iter(self.vertrectlist)]*4)
+
+		#these two loops create walls that the balls can bounce off of
+		for ele in self.horizrectlist:
+			self.horizwalls.add(Wall(ele[0],ele[1],ele[2],ele[3]))
+		for ele in self.vertrectlist:
+			self.vertwalls.add(Wall(ele[0],ele[1],ele[2],ele[3]))
+				
+		self.rect = self.image.get_rect(center = self.hole_location)
+		self.f.close()
+
+	def tick(self):
+		pygame.draw.lines(self.gs.screen, THECOLORS['brown'], False, self.bounds, 5)

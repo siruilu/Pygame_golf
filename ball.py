@@ -13,6 +13,7 @@ class Ball(pygame.sprite.Sprite):
 		self.vx = 0     #velocity
 		self.vy = 0
 		self.strokes = 0
+		self.justCollided=0#using this variable really helps with balls getting stuck on walls from what I saw. Doesn't completely stop it though
 		
 
 		#flags to indicate state of ball
@@ -60,26 +61,31 @@ class Ball(pygame.sprite.Sprite):
 
 		#if ball is in hole
 		elif self.inHole == True:
-			self.rect.center = (self.gs.holex, self.gs.holey)
+			self.rect.center = (self.gs.course.hole_location[0], self.gs.course.hole_location[1])
 
 
 	#adjust velocity if ball interacts with some environment object 
 	def detect_collision(self):
-		#if ball hits the edge of screen
-		if self.rect.centerx + self.vx > 640 or self.rect.centerx + self.vx < 0:
-			self.vx*=-1
-		if self.rect.centery + self.vy > 480 or self.rect.centery + self.vy < 0:
-			self.vy*=-1
 
-		#check if ball is in hole
-		if self.rect.collidepoint(self.gs.holex, self.gs.holey):
-			self.vy = 0
-			self.vx = 0
-			self.inHole = True
+		#Collision detection based entirely on sprite collision
+		if (self.justCollided == 0):
+			if pygame.sprite.spritecollideany(self, self.gs.course.vertwalls):
+				self.vx *= -1
+
+			if pygame.sprite.spritecollideany(self, self.gs.course.horizwalls):
+				self.vy *= -1
+
+			#check if ball is in hole
+			if self.rect.collidepoint(self.gs.course.hole_location[0], self.gs.course.hole_location[1]):
+				self.vy = 0
+				self.vx = 0
+				self.inHole = True
+			justCollided = 1
+		else:
+			justCollided = 0
 
 	#hit ball
 	def putt(self):
-		self.toHit = False
 		self.moving = True
 		#initiate movement
 		self.vx = -self.powerx/5
