@@ -14,8 +14,13 @@ class Ball(pygame.sprite.Sprite):
 		self.vy = 0
 		self.strokes = 0
 		self.justCollided=0#using this variable really helps with balls getting stuck on walls from what I saw. Doesn't completely stop it though
-		
 
+		#determines the loss of velocity
+		self.friction = .96
+
+		self.initialx = x
+		self.initialy = y
+		
 		#flags to indicate state of ball
 		self.tohit = False
 		self.moving = False
@@ -50,14 +55,13 @@ class Ball(pygame.sprite.Sprite):
 			self.detect_collision()
 			newpos = self.rect.move((self.vx, self.vy))
       			self.rect = newpos
-			self.vx *= .96
-			self.vy *= .96		
+			self.vx *= self.friction
+			self.vy *= self.friction		
 
 			if self.vx < 0.1 and self.vx > -0.1 and self.vy > -0.1 and self.vy < 0.1:
 				self.vx = 0
 				self.vy = 0
 				self.moving = False
-
 
 		#if ball is in hole
 		elif self.inHole == True:
@@ -84,6 +88,21 @@ class Ball(pygame.sprite.Sprite):
 		else:
 			justCollided = 0
 
+		
+		#if ball is in sand trap, adjust velocity accordingly
+		if self.gs.course.sandRect.collidepoint(self.rect.center):
+			self.friction = .65
+		else:
+			self.friction = .96
+
+		#if ball falls into water, put back into initial place and add one penalty stroke
+		if self.gs.course.sandRect.collidepoint(self.rect.center):
+			self.vx = 0
+			self.vy = 0
+			self.rect.center = (self.initialx, self.initialy)
+			self.strokes+=1
+		
+
 	#hit ball
 	def putt(self):
 		self.moving = True
@@ -91,5 +110,9 @@ class Ball(pygame.sprite.Sprite):
 		self.vx = -self.powerx/5
 		self.vy = -self.powery/5
 		self.strokes+=1
+		#save initial point in case ball goes into water trap
+		self.initialx = self.rect.centerx
+		self.initialy = self.rect.centery
+		
 		
 		

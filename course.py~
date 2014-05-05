@@ -71,6 +71,7 @@ class Course(pygame.sprite.Sprite):
 			self.sandimage = pygame.image.load(self.sand)
 			self.imageRect = self.image.get_rect(center = self.sandxy)
 			self.sandRect = Rect(self.sandargs)
+			print self.sandRect
 				
 		self.rect = self.image.get_rect(center = self.hole_location)
 		self.f.close()

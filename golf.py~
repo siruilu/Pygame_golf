@@ -28,7 +28,7 @@ class GameSpace:
 		self.turn = 1
 
 		#hole number
-		self.hole_num = 7
+		self.hole_num = 4
 
 		#initiate first hole
 		self.next_hole()
@@ -43,6 +43,8 @@ class GameSpace:
 
 		self.player1score = 0  #Will be used to keep track of player totals across courses
 		self.player2score = 0
+
+		self.finished = False
 		
     		self.screen = pygame.display.set_mode(self.size)
 
@@ -55,6 +57,10 @@ class GameSpace:
 		#Gives each player their own color ball
 		self.ball1.image = pygame.image.load("/afs/nd.edu/user2/dhaberme/Public/red_golfball.fw.png")
 		self.ball2.image = pygame.image.load("/afs/nd.edu/user2/dhaberme/Public/blue_golfball.fw.png")
+
+		#set background
+		self.background = pygame.image.load("/afs/nd.edu/user2/dhaberme/Public/background3.png")
+        	self.backgroundRect = self.background.get_rect()
 
 		#reset turn and flags
 		self.turn = 1
@@ -88,7 +94,7 @@ class GameSpace:
 		if inhole == "True":
 			self.inhole = True
 		else:
-			self.inhope = False
+			self.inhole = False
 		
 
 
@@ -99,6 +105,7 @@ class GameSpace:
 			self.connection.transport.write(str(self.ball1.rect.centerx) + "," + str(self.ball1.rect.centery) + "," + str(self.ball1.strokes) + "," + str(self.ball1.tohit) + "," + str(self.ball1.moving) + "," + str(self.ball1.inHole) )
 		if self.player == 2:
 			self.connection.transport.write(str(self.ball2.rect.centerx) + "," + str(self.ball2.rect.centery) + "," + str(self.ball2.strokes) + "," + str(self.ball2.tohit) + "," + str(self.ball2.moving) + "," + str(self.ball2.inHole) )
+
 			
 		#set information from data received
 		if self.player == 1:
@@ -167,9 +174,10 @@ class GameSpace:
 							#after putt, switch turn and tell other player 
 							if self.ball1.inHole == False:
 								self.turn = 1
-				elif event.type == KEYDOWN and event.key == K_UP:
-					self.ball2.inHole = True
-					self.ball1.inHole = True
+				#for testing only
+#				elif event.type == KEYDOWN and event.key == K_UP:
+#					self.ball2.inHole = True
+#					self.ball1.inHole = True
 
 			#update all objects
 			self.ball1.tick()
@@ -179,10 +187,13 @@ class GameSpace:
 			self.screen.fill(self.color)
 			
 			#draw hole and balls
-			self.course.tick()
+ 			self.screen.blit(self.background, self.backgroundRect)
+			if self.course.sandimage != None:
+				self.screen.blit(self.course.sandimage, self.course.imageRect)
 			self.screen.blit(self.course.image, self.course.rect)
 			self.screen.blit(self.ball1.image, self.ball2.rect)
 			self.screen.blit(self.ball2.image, self.ball1.rect)
+			self.course.tick()
 
 
 			#draw line for putting
@@ -205,7 +216,7 @@ class GameSpace:
    			self.player1total = self.myfont.render("Player 1 Total: " + str(self.player1score), 1, THECOLORS['blue'])
         		self.player2total = self.myfont.render("Player 2 Total: " + str(self.player2score), 1, THECOLORS['red'])
             		self.screen.blit(self.player1total, (5, 15))
-            		self.screen.blit(self.player2total, (5,35))
+            		self.screen.blit(self.player2total, (5,30))
 			
 
 			pygame.display.flip()
@@ -217,28 +228,40 @@ class GameSpace:
 			self.hole_num += 1
 			self.next_hole()
 
-		#this means done with course
-		else:
+		#this means done with course, calculate score one last time
+		elif self.finished == False:
+			
 			self.player1score = self.player1score + (int(self.ball1.strokes) - int(self.course.par) + 1)
 			self.player2score = self.player2score + (int(self.ball2.strokes) - int(self.course.par) + 1)
+			self.finished = True
 
-			if self.player1score > self.player2score:
+		else:
+		
+			if self.player1score < self.player2score:
 				self.end_label = self.myfont.render("Player 1 Wins!!", 1, THECOLORS['black'])
-			elif self.player2score > self.player1score:
+			elif self.player2score < self.player1score:
 				self.end_label = self.myfont.render("Player 2 Wins!!", 1, THECOLORS['black'])
 			else:
 				self.end_label = self.myfont.render("It is a tie!", 1, THECOLORS['black'])
 
 			self.end1 = self.myfont.render("Player 1 Final Strokes: " + str(self.player1score), 1, THECOLORS['blue'])
 			self.end2 = self.myfont.render("Player 2 Final Strokes: " + str(self.player2score), 1, THECOLORS['red'])
-	      		self.screen.blit(self.end_label, (320, 215) )
-			self.screen.blit(self.end1, (320, 230) )
-			self.screen.blit(self.end2, (320, 245) )
+
+			self.screen.fill(self.color)
+	      		self.screen.blit(self.end_label, (240, 215) )
+			self.screen.blit(self.end1, (240, 230) )
+			self.screen.blit(self.end2, (240, 245) )
 
 			pygame.display.flip()
-			
 
-
+			#allow user to exit game
+			for event in pygame.event.get():
+      				if event.type == QUIT:
+      			        	pygame.quit()
+					reactor.stop()
+      				elif event.type == KEYDOWN and event.key == K_ESCAPE:
+      			    		pygame.quit()
+					reactor.stop()
 
 
 #networking classes
@@ -250,7 +273,6 @@ class Connection(Protocol):
 			
 		#call function that handles data
 		self.gs.set_data(parsed[0], parsed[1], parsed[2], parsed[3], parsed[4], parsed[5])			
-
 		
 		#run main loop
 		self.gs.main()
