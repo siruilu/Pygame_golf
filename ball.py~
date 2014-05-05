@@ -13,7 +13,7 @@ class Ball(pygame.sprite.Sprite):
 		self.vx = 0     #velocity
 		self.vy = 0
 		self.strokes = 0
-		self.justCollided=0#using this variable really helps with balls getting stuck on walls from what I saw. Doesn't completely stop it though
+		self.justCollided=0 #using this variable really helps with balls getting stuck on walls from what I saw. Doesn't completely stop it though
 
 		#determines the loss of velocity
 		self.friction = .96

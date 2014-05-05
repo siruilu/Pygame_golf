@@ -79,7 +79,7 @@ class Course(pygame.sprite.Sprite):
 			self.sandimage = pygame.image.load(self.sand)
 			self.imageRect = self.image.get_rect(center = self.sandxy)
 			self.sandRect = Rect(self.sandargs)
-		if self.waterxy:
+		if self.waterxy != (0,0):
 			self.waterimage = pygame.image.load(self.water)
 			self.waterimageRect = self.image.get_rect(center = self.waterxy)
 			self.waterRect = Rect(self.waterargs)

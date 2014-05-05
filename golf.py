@@ -28,7 +28,7 @@ class GameSpace:
 		self.turn = 1
 
 		#hole number
-		self.hole_num = 8
+		self.hole_num = 1
 
 		#initiate first hole
 		self.next_hole()

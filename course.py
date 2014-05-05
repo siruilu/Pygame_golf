@@ -23,6 +23,7 @@ class Course(pygame.sprite.Sprite):
 		self.filename = '/afs/nd.edu/user2/dhaberme/Public/course' + filename + '.py'
 		self.image = pygame.image.load("/afs/nd.edu/user2/dhaberme/Public/golf_hole.png")
 		self.sandimage = None
+		self.waterimage = None
 		self.f = file(self.filename, 'r')
 		self.horizrectlist = []
 		self.vertrectlist = []
