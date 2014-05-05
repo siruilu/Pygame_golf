@@ -200,6 +200,12 @@ class GameSpace:
       			self.screen.blit(self.turn_label, (495, 0) )
 			self.screen.blit(self.strokes1, (457, 15) )
 			self.screen.blit(self.strokes2, (457, 30) )
+
+			#display total score for each player
+   			self.player1total = self.myfont.render("Player 1 Total: " + str(self.player1score), 1, THECOLORS['blue'])
+        		self.player2total = self.myfont.render("Player 2 Total: " + str(self.player2score), 1, THECOLORS['red'])
+            		self.screen.blit(self.player1total, (5, 15))
+            		self.screen.blit(self.player2total, (5,35))
 			
 
 			pygame.display.flip()
