@@ -28,7 +28,7 @@ class GameSpace:
 		self.turn = 1
 
 		#hole number
-		self.hole_num = 9
+		self.hole_num = 7
 
 		#initiate first hole
 		self.next_hole()
@@ -48,7 +48,6 @@ class GameSpace:
 
 	#on to next hole
 	def next_hole(self):
-		print 'Next'
 		self.course = course.Course(self, str(self.hole_num))
 		self.ball1 = ball.Ball(self, self.course.ball_location[0], self.course.ball_location[1])
 		self.ball2 = ball.Ball(self, self.course.ball_location[0], self.course.ball_location[1])
@@ -57,7 +56,17 @@ class GameSpace:
 		self.ball1.image = pygame.image.load("/afs/nd.edu/user2/dhaberme/Public/red_golfball.fw.png")
 		self.ball2.image = pygame.image.load("/afs/nd.edu/user2/dhaberme/Public/blue_golfball.fw.png")
 
+		#reset turn and flags
 		self.turn = 1
+
+		self.ball1.tohit = False
+		self.ball1.moving = False
+		self.ball1.inHole = False
+		
+		self.ball2.tohit = False
+		self.ball2.moving = False
+		self.ball2.inHole = False
+
 
 
 	#receive data sent from other player
