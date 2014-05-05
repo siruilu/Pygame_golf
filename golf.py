@@ -28,7 +28,7 @@ class GameSpace:
 		self.turn = 1
 
 		#hole number
-		self.hole_num = 8
+		self.hole_num = 9
 
 		#initiate first hole
 		self.next_hole()
@@ -48,6 +48,7 @@ class GameSpace:
 
 	#on to next hole
 	def next_hole(self):
+		print 'Next'
 		self.course = course.Course(self, str(self.hole_num))
 		self.ball1 = ball.Ball(self, self.course.ball_location[0], self.course.ball_location[1])
 		self.ball2 = ball.Ball(self, self.course.ball_location[0], self.course.ball_location[1])
@@ -84,29 +85,29 @@ class GameSpace:
 
 	#main loop
 	def main(self):
+		#send data over connection
+		if self.player == 1:
+			self.connection.transport.write(str(self.ball1.rect.centerx) + "," + str(self.ball1.rect.centery) + "," + str(self.ball1.strokes) + "," + str(self.ball1.tohit) + "," + str(self.ball1.moving) + "," + str(self.ball1.inHole) )
+		if self.player == 2:
+			self.connection.transport.write(str(self.ball2.rect.centerx) + "," + str(self.ball2.rect.centery) + "," + str(self.ball2.strokes) + "," + str(self.ball2.tohit) + "," + str(self.ball2.moving) + "," + str(self.ball2.inHole) )
+			
+		#set information from data received
+		if self.player == 1:
+			self.ball2.rect.center = (self.xpos, self.ypos)
+			self.ball2.strokes = self.other_score
+			self.ball2.tohit = self.tohit
+			self.ball2.moving = self.moving
+			self.ball2.inHole = self.inhole
+		if self.player == 2:
+			self.ball1.rect.center = (self.xpos, self.ypos)		
+			self.ball1.strokes = self.other_score
+			self.ball1.tohit = self.tohit
+			self.ball1.moving = self.moving
+			self.ball1.inHole = self.inhole
 		
+
 		#if both balls are not in hole, continue gameplay
 		if self.ball1.inHole == False or self.ball2.inHole == False:
-			#send data over connection
-			if self.player == 1:
-				self.connection.transport.write(str(self.ball1.rect.centerx) + "," + str(self.ball1.rect.centery) + "," + str(self.ball1.strokes) + "," + str(self.ball1.tohit) + "," + str(self.ball1.moving) + "," + str(self.ball1.inHole) )
-			if self.player == 2:
-				self.connection.transport.write(str(self.ball2.rect.centerx) + "," + str(self.ball2.rect.centery) + "," + str(self.ball2.strokes) + "," + str(self.ball2.tohit) + "," + str(self.ball2.moving) + "," + str(self.ball2.inHole) )
-			
-			#set information from data received
-			if self.player == 1:
-				self.ball2.rect.center = (self.xpos, self.ypos)
-				self.ball2.strokes = self.other_score
-				self.ball2.tohit = self.tohit
-				self.ball2.moving = self.moving
-				self.ball2.inHole = self.inhole
-			if self.player == 2:
-				self.ball1.rect.center = (self.xpos, self.ypos)		
-				self.ball1.strokes = self.other_score
-				self.ball1.tohit = self.tohit
-				self.ball1.moving = self.moving
-				self.ball1.inHole = self.inhole
-
 
 			#set turn
 			if self.ball1.inHole == True:
@@ -134,10 +135,10 @@ class GameSpace:
 					#determine if it is your turn
 					if self.turn == 1 and self.player == 1:					
 						#only start putting process if ball is not moving
-						if self.ball2.moving == False and self.ball1.inHole == False:
+						if self.ball2.moving == False and self.ball1.inHole == False and self.ball1.moving == False:
 							self.ball1.tohit = True
 					elif self.turn == 2 and self.player == 2:
-						if self.ball1.moving == False and self.ball2.inHole == False:
+						if self.ball1.moving == False and self.ball2.inHole == False and self.ball2.moving == False:
 							self.ball2.tohit = True
 				elif event.type == MOUSEBUTTONUP and event.button == 1:
 					if self.turn == 1 and self.player == 1:
@@ -157,6 +158,9 @@ class GameSpace:
 							#after putt, switch turn and tell other player 
 							if self.ball1.inHole == False:
 								self.turn = 1
+				elif event.type == KEYDOWN and event.key == K_UP:
+					self.ball2.inHole = True
+					self.ball1.inHole = True
 
 			#update all objects
 			self.ball1.tick()
@@ -215,6 +219,8 @@ class GameSpace:
 	      		self.screen.blit(self.end_label, (320, 215) )
 			self.screen.blit(self.end1, (320, 230) )
 			self.screen.blit(self.end2, (320, 245) )
+
+			pygame.display.flip()
 			
 
 
