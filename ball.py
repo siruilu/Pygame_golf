@@ -13,7 +13,7 @@ class Ball(pygame.sprite.Sprite):
 		self.vx = 0     #velocity
 		self.vy = 0
 		self.strokes = 0
-		self.justCollided=0#using this variable really helps with balls getting stuck on walls from what I saw. Doesn't completely stop it though
+		self.justCollided=0 #using this variable really helps with balls getting stuck on walls from what I saw. Doesn't completely stop it though
 
 		#determines the loss of velocity
 		self.friction = .96
@@ -89,18 +89,21 @@ class Ball(pygame.sprite.Sprite):
 			justCollided = 0
 
 		
-		#if ball is in sand trap, adjust velocity accordingly
-		if self.gs.course.sandRect.collidepoint(self.rect.center):
-			self.friction = .65
-		else:
-			self.friction = .96
-
-		#if ball falls into water, put back into initial place and add one penalty stroke
-		if self.gs.course.sandRect.collidepoint(self.rect.center):
-			self.vx = 0
-			self.vy = 0
-			self.rect.center = (self.initialx, self.initialy)
-			self.strokes+=1
+		#if there is sand on this hole
+		if self.gs.course.sandxy != (0,0):
+			#if ball is in sand trap, adjust velocity accordingly
+			if self.gs.course.sandRect.collidepoint(self.rect.center):
+				self.friction = .65
+			else:
+				self.friction = .96
+		
+		#if there is water on this hole
+		if self.gs.course.waterxy != (0,0):
+			#if ball falls into water, put back into initial place and add one penalty stroke
+			if self.gs.course.waterRect.collidepoint(self.rect.center):
+				self.vx = 0
+				self.vy = 0
+				self.rect.center = (self.initialx, self.initialy)
 		
 
 	#hit ball

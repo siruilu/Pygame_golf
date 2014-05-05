@@ -28,7 +28,7 @@ class GameSpace:
 		self.turn = 1
 
 		#hole number
-		self.hole_num = 4
+		self.hole_num = 8
 
 		#initiate first hole
 		self.next_hole()
@@ -190,6 +190,8 @@ class GameSpace:
  			self.screen.blit(self.background, self.backgroundRect)
 			if self.course.sandimage != None:
 				self.screen.blit(self.course.sandimage, self.course.imageRect)
+			if self.course.waterimage != None:
+				self.screen.blit(self.course.waterimage, self.course.waterimageRect)
 			self.screen.blit(self.course.image, self.course.rect)
 			self.screen.blit(self.ball1.image, self.ball2.rect)
 			self.screen.blit(self.ball2.image, self.ball1.rect)

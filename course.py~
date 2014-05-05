@@ -17,6 +17,7 @@ class Course(pygame.sprite.Sprite):
 		self.bounds = []
 		self.hole_location = ()
 		self.sand = '/afs/nd.edu/user2/dhaberme/Public/sand'
+		self.water = '/afs/nd.edu/user2/dhaberme/Public/water'
 		self.sandxy = ()
 		self.par = 0
 		self.filename = '/afs/nd.edu/user2/dhaberme/Public/course' + filename + '.py'
@@ -59,7 +60,14 @@ class Course(pygame.sprite.Sprite):
 				sandnum = eval(self.line)
 				self.sand = self.sand + str(sandnum) + '.png'
 			if count == 9:
-                		self.sandargs = eval(self.line)
+				self.sandargs = eval(self.line)
+			if count == 10:
+				self.waterxy = eval(self.line)
+			if count == 11:
+				waternum = eval(self.line)
+				self.water = self.water + str(waternum) + '.png'
+			if count == 12:
+				self.waterargs = eval(self.line)
 
 		#these two loops create walls that the balls can bounce off of
 		for ele in self.horizrectlist:
@@ -71,7 +79,10 @@ class Course(pygame.sprite.Sprite):
 			self.sandimage = pygame.image.load(self.sand)
 			self.imageRect = self.image.get_rect(center = self.sandxy)
 			self.sandRect = Rect(self.sandargs)
-			print self.sandRect
+		if self.waterxy:
+			self.waterimage = pygame.image.load(self.water)
+			self.waterimageRect = self.image.get_rect(center = self.waterxy)
+			self.waterRect = Rect(self.waterargs)
 				
 		self.rect = self.image.get_rect(center = self.hole_location)
 		self.f.close()
