@@ -3,6 +3,7 @@
 import os, sys
 import pygame
 import math
+import pickle
 from pygame.locals import *
 from pygame.color import THECOLORS
 from twisted.internet.protocol import ClientFactory, Protocol
@@ -35,9 +36,7 @@ class GameSpace:
 		self.turn = 1
 
 		#temporary variables for receiving data over connection		
-		self.xpos = 100
-		self.ypos = 100
-		self.other_score = 0
+		self.data = dict()
 		
     		self.screen = pygame.display.set_mode(self.size)
 
@@ -51,10 +50,11 @@ class GameSpace:
 
 
 	#receive data sent from other player
-	def set_data(self, xpos, ypos, other_score):
-		self.xpos = int(xpos)
-		self.ypos = int(ypos)
-		self.other_score = int(other_score)
+	def handle_data(self, ball):
+		if self.player == 1:
+			self.ball2 = ball['ball']
+		else:
+			self.ball1 = ball['ball']
 
 
 	#main loop
@@ -62,9 +62,14 @@ class GameSpace:
 		
 		if True:
 			#send data over connection
-
-			self.connection.transport.write(self)
-
+			if self.player == 1:
+				self.data['ball'] = self.ball1
+				resp = pickle.dumps(self.data)
+				self.connection.transport.write(resp)
+			else:
+				self.data['ball'] = self.ball2
+				resp = pickle.dumps(self.data)
+				self.connection.transport.write(resp)
 
 			#set turn
 			if self.ball2.strokes < self.ball1.strokes:
@@ -148,11 +153,8 @@ class GameSpace:
 class Connection(Protocol):
 	def dataReceived(self, data):
 
-		#parse data
-		parsed = data.split(',')
-			
-		#call function that handles data
-		self.gs.set_data(parsed[0], parsed[1], parsed[2])				
+		ball = json.loads(data)
+		self.gs.handle_data(ball)			
 		
 		#run main loop
 		self.gs.main()

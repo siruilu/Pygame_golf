@@ -79,6 +79,7 @@ class Ball(pygame.sprite.Sprite):
 
 	#hit ball
 	def putt(self):
+		self.toHit = False
 		self.moving = True
 		#initiate movement
 		self.vx = -self.powerx/5

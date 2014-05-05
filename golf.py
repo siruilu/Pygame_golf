@@ -38,6 +38,9 @@ class GameSpace:
 		self.xpos = 100
 		self.ypos = 100
 		self.other_score = 0
+		self.tohit = False
+		self.moving = False
+		self.inhole = False
 		
     		self.screen = pygame.display.set_mode(self.size)
 
@@ -51,10 +54,26 @@ class GameSpace:
 
 
 	#receive data sent from other player
-	def set_data(self, xpos, ypos, other_score):
+	def set_data(self, xpos, ypos, other_score, tohit, moving, inhole):
 		self.xpos = int(xpos)
 		self.ypos = int(ypos)
 		self.other_score = int(other_score)
+
+		if tohit == "True":
+			self.tohit = True
+		else:
+			self.tohit = False
+
+		if moving == "True":
+			self.moving = True
+		else:
+			self.moving = False
+
+		if inhole == "True":
+			self.inhole = True
+		else:
+			self.inhope = False
+		
 
 
 	#main loop
@@ -63,17 +82,24 @@ class GameSpace:
 		if True:
 			#send data over connection
 			if self.player == 1:
-				self.connection.transport.write(str(self.ball1.rect.centerx) + "," + str(self.ball1.rect.centery) + "," + str(self.ball1.strokes))
+				self.connection.transport.write(str(self.ball1.rect.centerx) + "," + str(self.ball1.rect.centery) + "," + str(self.ball1.strokes) + "," + str(self.ball1.tohit) + "," + str(self.ball1.moving) + "," + str(self.ball1.inHole) )
 			if self.player == 2:
-				self.connection.transport.write(str(self.ball2.rect.centerx) + "," + str(self.ball2.rect.centery) + "," + str(self.ball2.strokes) )
-
+				self.connection.transport.write(str(self.ball2.rect.centerx) + "," + str(self.ball2.rect.centery) + "," + str(self.ball2.strokes) + "," + str(self.ball2.tohit) + "," + str(self.ball2.moving) + "," + str(self.ball2.inHole) )
+			
 			#set information from data received
 			if self.player == 1:
 				self.ball2.rect.center = (self.xpos, self.ypos)
 				self.ball2.strokes = self.other_score
+				self.ball2.tohit = self.tohit
+				self.ball2.moving = self.moving
+				self.ball2.inHole = self.inhole
 			if self.player == 2:
 				self.ball1.rect.center = (self.xpos, self.ypos)		
 				self.ball1.strokes = self.other_score
+				self.ball1.tohit = self.tohit
+				self.ball1.moving = self.moving
+				self.ball1.inHole = self.inhole
+
 
 			#set turn
 			if self.ball1.inHole == True:
@@ -82,7 +108,7 @@ class GameSpace:
 				self.turn == 1
 			elif self.ball2.strokes < self.ball1.strokes:
 				self.turn = 2
-			else:	
+			elif self.ball1.inHole == False:	
 				self.turn = 1			
 
 			#get the mouse x and y position on the screen
@@ -165,7 +191,8 @@ class Connection(Protocol):
 		parsed = data.split(',')
 			
 		#call function that handles data
-		self.gs.set_data(parsed[0], parsed[1], parsed[2])				
+		self.gs.set_data(parsed[0], parsed[1], parsed[2], parsed[3], parsed[4], parsed[5])			
+
 		
 		#run main loop
 		self.gs.main()
