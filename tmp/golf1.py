@@ -62,25 +62,12 @@ class GameSpace:
 		
 		if True:
 			#send data over connection
-			if self.player == 1:
-				self.connection.transport.write(str(self.ball1.rect.centerx) + "," + str(self.ball1.rect.centery) + "," + str(self.ball1.strokes))
-			if self.player == 2:
-				self.connection.transport.write(str(self.ball2.rect.centerx) + "," + str(self.ball2.rect.centery) + "," + str(self.ball2.strokes) )
 
-			#set information from data received
-			if self.player == 1:
-				self.ball2.rect.center = (self.xpos, self.ypos)
-				self.ball2.strokes = self.other_score
-			if self.player == 2:
-				self.ball1.rect.center = (self.xpos, self.ypos)		
-				self.ball1.strokes = self.other_score
+			self.connection.transport.write(self)
+
 
 			#set turn
-			if self.ball1.inHole == True:
-				self.turn == 2
-			elif self.ball2.inHole == True:
-				self.turn == 1
-			elif self.ball2.strokes < self.ball1.strokes:
+			if self.ball2.strokes < self.ball1.strokes:
 				self.turn = 2
 			else:	
 				self.turn = 1			
@@ -161,11 +148,7 @@ class GameSpace:
 class Connection(Protocol):
 	def dataReceived(self, data):
 
-		#parse data
-		parsed = data.split(',')
-			
-		#call function that handles data
-		self.gs.set_data(parsed[0], parsed[1], parsed[2])				
+		self.gs = data			
 		
 		#run main loop
 		self.gs.main()
@@ -202,9 +185,6 @@ if __name__ == "__main__":
 			reactor.connectTCP("student03.cse.nd.edu", 40034, ConnectionFactory())
 			reactor.run() 	
 	
-
-		
-
 
 		
 

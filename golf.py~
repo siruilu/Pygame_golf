@@ -16,9 +16,6 @@ class GameSpace:
 		self.player = num
 		self.connection = connection
 
-
-	def main(self):
-
 		self.ball1 = ball.Ball(self)
 		self.ball2 = ball.Ball(self)
 
@@ -36,7 +33,11 @@ class GameSpace:
 
 		#whose turn it is
 		self.turn = 1
-		
+
+		#temporary variables for receiving data over connection		
+		self.xpos = 100
+		self.ypos = 100
+		self.other_score = 0
 		
     		self.screen = pygame.display.set_mode(self.size)
 
@@ -46,16 +47,43 @@ class GameSpace:
 		self.ball2.image.convert_alpha()
 		self.ball2.image.set_colorkey(THECOLORS['white'])
 
+		print "GameSpace created"	
 
-		while 1:
+
+	#receive data sent from other player
+	def set_data(self, xpos, ypos, other_score):
+		self.xpos = int(xpos)
+		self.ypos = int(ypos)
+		self.other_score = int(other_score)
+
+
+	#main loop
+	def main(self):
+		
+		if True:
 			#send data over connection
 			if self.player == 1:
-				self.connection.transport.write(str(self.ball1.rect.centerx) + "," + str(self.ball1.rect.centery))
+				self.connection.transport.write(str(self.ball1.rect.centerx) + "," + str(self.ball1.rect.centery) + "," + str(self.ball1.strokes))
 			if self.player == 2:
-				self.connection.transport.write(str(self.ball2.rect.centerx) + "," + str(self.ball2.rect.centery))
+				self.connection.transport.write(str(self.ball2.rect.centerx) + "," + str(self.ball2.rect.centery) + "," + str(self.ball2.strokes) )
 
-			
-			reactor.run()
+			#set information from data received
+			if self.player == 1:
+				self.ball2.rect.center = (self.xpos, self.ypos)
+				self.ball2.strokes = self.other_score
+			if self.player == 2:
+				self.ball1.rect.center = (self.xpos, self.ypos)		
+				self.ball1.strokes = self.other_score
+
+			#set turn
+			if self.ball1.inHole == True:
+				self.turn == 2
+			elif self.ball2.inHole == True:
+				self.turn == 1
+			elif self.ball2.strokes < self.ball1.strokes:
+				self.turn = 2
+			elif self.ball1.inHole == False:	
+				self.turn = 1			
 
 			#get the mouse x and y position on the screen
 			self.mx, self.my = pygame.mouse.get_pos()
@@ -64,8 +92,10 @@ class GameSpace:
       			for event in pygame.event.get():
       				if event.type == QUIT:
       			        	pygame.quit()
+					reactor.stop()
       				elif event.type == KEYDOWN and event.key == K_ESCAPE:
       			    		pygame.quit()
+					reactor.stop()
 				#putt
 				elif event.type == MOUSEBUTTONDOWN and event.button == 1:
 					#determine if it is your turn
@@ -85,11 +115,13 @@ class GameSpace:
 							#switch turn to next player if not done
 							if self.ball2.inHole == False:
 								self.turn = 2
+
 							
 					elif self.turn == 2 and self.player == 2: 					
 						if self.ball1.moving == False and self.ball2.tohit == True and self.ball2.inHole == False:					
 							self.ball2.tohit = False
 							self.ball2.putt()
+							#after putt, switch turn and tell other player 
 							if self.ball1.inHole == False:
 								self.turn = 1
 
@@ -123,28 +155,29 @@ class GameSpace:
 			pygame.display.flip()
 
 
+
+
 #networking classes
 class Connection(Protocol):
 	def dataReceived(self, data):
-		print 'Receive'
-		#data contains positions
 
 		#parse data
-		data.partition(',')
+		parsed = data.split(',')
 			
-		#change other player's ball position
-		if int(sys.argv[1]) == 1:							
-			gs.ball2.rect.center = (data[0], data[2])				
-		if int(sys.argv[1]) == 2:							
-			gs.ball1.rect.center = (data[0], data[2])	
-			
+		#call function that handles data
+		self.gs.set_data(parsed[0], parsed[1], parsed[2])				
 		
-  	def connectionMade(self):
-		print 'Connected to other player'
-		gs = GameSpace(int(sys.argv[1]), self)   #initate game and pass self
-		gs.main()
+		#run main loop
+		self.gs.main()
 
+					
+  	def connectionMade(self):
+		print 'Connected as Player ' + str(sys.argv[1])
+		#when connected, make game and run main loop once
+		self.gs = GameSpace(int(sys.argv[1]), self)
+		self.gs.main()
 		
+
 class ConnectionFactory(ClientFactory):
  	def buildProtocol(self, addr):
 	  	return Connection()
@@ -169,6 +202,9 @@ if __name__ == "__main__":
 			reactor.connectTCP("student03.cse.nd.edu", 40034, ConnectionFactory())
 			reactor.run() 	
 	
+
+		
+
 
 		
 
